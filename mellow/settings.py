@@ -22,7 +22,7 @@ def settings():
 	# Check whether the settings db exists
 	if not os.path.isdir(DBDIR):
 		os.makedirs(DBDIR)
-	if not os.path.isfile(DBFILE):
+	if not os.path.isfile(SETTINGSDB):
 		self.createdb()
 
 
