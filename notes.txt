@@ -1,0 +1,5 @@
+
+py-sonic
+
+http://stuffivelearned.org/doku.php?id=programming:python:py-sonic
+https://github.com/crustymonkey/py-sonic
