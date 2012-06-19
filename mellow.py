@@ -35,7 +35,19 @@ class MainWindow(Gtk.Window):
 
 
 		# Artists list
+		self.artistliststore = Gtk.ListStore(int, str)
+		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
+		self.grid.attach_next_to(self.artisttreeview, self.connectButton, Gtk.PositionType.BOTTOM, 1, 2)
+
 		self.load_artist_list()
+
+		# Album list
+		self.albumliststore = Gtk.ListStore(int, str)
+		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
+		self.grid.attach_next_to(self.albumtreeview, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
+
+		pprint(self.artistliststore)
+		#self.load_album_list(self.artistliststore.)
 
 
 		#self.set_default_size(gtk.gdk.screen_width(),500)
@@ -48,9 +60,6 @@ class MainWindow(Gtk.Window):
 		"""
 		Refresh artists listing
 		"""
-
-		mainwindow.artistliststore = Gtk.ListStore(int, str)
-
 		# fetch artists, @TODO: has ifModifiedSince for caching
 		userinfo = settings.login()
 		conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
@@ -58,40 +67,36 @@ class MainWindow(Gtk.Window):
 		artists = conn.getIndexes()
 		#pprint(artists)
 
+		mainwindow.artistliststore.clear()
+
 		for artistLetter in artists['indexes']['index']:
-			pprint(artistLetter)
+			#pprint(artistLetter)
 			theseArtists = artistLetter['artist']
 			thisLetter = artistLetter['name']
-			print(thisLetter)
+			#print(thisLetter)
 
 			if thisLetter == 'A':
 				for thisArtist in theseArtists:
 					mainwindow.artistliststore.append([thisArtist['id'], thisArtist['name']])
 
-
-		artisttreeview = Gtk.TreeView(model=mainwindow.artistliststore)
-
-		renderer_text = Gtk.CellRendererText()
-		column_text = Gtk.TreeViewColumn("ID", renderer_text, text=0)
-		artisttreeview.append_column(column_text)
+		#renderer_text = Gtk.CellRendererText()
+		#column_text = Gtk.TreeViewColumn("ID", renderer_text, text=0)
+		#mainwindow.artisttreeview.append_column(column_text)
 
 		renderer_artistName = Gtk.CellRendererText()
 		#renderer_editabletext.set_property("editable", True)
 
 		column_artistName = Gtk.TreeViewColumn("Artist", renderer_artistName, text=1)
-		artisttreeview.append_column(column_artistName)
+		mainwindow.artisttreeview.append_column(column_artistName)
 
 		# Make 'artistname' column searchable
-		artisttreeview.set_search_column(1)
+		mainwindow.artisttreeview.set_search_column(1)
 
 		#renderer_editabletext.connect("edited", self.text_edited)
 
-		#mainwindow.box.pack_start(artisttreeview, True, True, 0)
-		mainwindow.grid.attach_next_to(artisttreeview, mainwindow.connectButton, Gtk.PositionType.BOTTOM, 1, 2)
 
 
-
-	def load_albumlist(artist, albums):
+	def load_album_list(artist, albums):
 		# Allow sorting on the column
 		#self.tvcolumn.set_sort_column_id(0)
 
