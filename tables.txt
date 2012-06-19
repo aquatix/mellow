@@ -38,9 +38,9 @@ size			?
 cached			boolean? it's in this table *because* it is cached
 
 
-========================================
-~/.cache/mellow/username@host/artists.db
-========================================
+======================================
+~/.cache/mellow/username@host/cache.db
+======================================
 
 artists
 -------
@@ -48,4 +48,10 @@ id
 name
 
 
+albums
+------
+
+
+tracks
+------
 
