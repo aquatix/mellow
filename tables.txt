@@ -1,0 +1,51 @@
+
+==========================
+~/.config/mellow/mellow.db
+==========================
+
+
+settingsinfo
+------------
+dbVersion		version of the settings DB
+winX			location of the main window on the screen
+winY
+winWidth		dimensions of the main window
+winHeight
+created			datetime of creation of this tuple
+
+
+userinfo
+--------
+username
+password
+host			url for the server
+port			port of the server
+localcachedir		directory for storing music files offline
+localcachemax		max size of local cache in MB
+created			datetime of creation of this tuple
+
+
+
+===========================================
+~/.cache/mellow/username@host/localfiles.db
+===========================================
+
+tracks
+------
+filename
+artist			?
+size			?
+cached			boolean? it's in this table *because* it is cached
+
+
+========================================
+~/.cache/mellow/username@host/artists.db
+========================================
+
+artists
+-------
+id
+name
+
+
+
