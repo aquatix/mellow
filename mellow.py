@@ -24,6 +24,18 @@ class MainWindow(Gtk.Window):
 	def __init__(self):
 		Gtk.Window.__init__(self, title="Mellow")
 
+
+		#self.vpan = Gtk.VPaned()
+		#self.hpan = Gtk.HPaned()
+
+		#self.vpan.show()
+		#self.hpan.show()
+
+		#self.vBox1.pack_end(self.hpan, True, True, 0)
+		#self.hpan.pack1(self.vpan, False, True)
+
+
+
 		# Start the grid
 		self.grid = Gtk.Grid()
 		self.add(self.grid)
@@ -37,7 +49,7 @@ class MainWindow(Gtk.Window):
 		# Artists list
 		self.artistliststore = Gtk.ListStore(int, str)
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
-		self.artisttreeview.set_fixed_height_mode(True)
+		#self.artisttreeview.set_fixed_height_mode(True)
 		self.grid.attach_next_to(self.artisttreeview, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
 
 		self.load_artist_list()
