@@ -37,7 +37,8 @@ class MainWindow(Gtk.Window):
 		# Artists list
 		self.artistliststore = Gtk.ListStore(int, str)
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
-		self.grid.attach_next_to(self.artisttreeview, self.connectButton, Gtk.PositionType.BOTTOM, 1, 2)
+		self.artisttreeview.set_fixed_height_mode(True)
+		self.grid.attach_next_to(self.artisttreeview, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
 
 		self.load_artist_list()
 
@@ -46,8 +47,8 @@ class MainWindow(Gtk.Window):
 		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
 		self.grid.attach_next_to(self.albumtreeview, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
 
-		pprint(self.artistliststore)
-		#self.load_album_list(self.artistliststore.)
+		pprint(self.artistliststore.get(0))
+		#self.load_album_list(self.artistliststore.get(1))
 
 
 		#self.set_default_size(gtk.gdk.screen_width(),500)
@@ -111,7 +112,7 @@ class MainWindow(Gtk.Window):
 
 		#settings.createdb()
 		userinfo = settings.login()
-		pprint(userinfo)
+		#pprint(userinfo)
 
 		conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
 

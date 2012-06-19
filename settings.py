@@ -2,16 +2,14 @@ import sqlite3
 import os
 from pprint import pprint
 
-print(sqlite3.version_info)
-print(sqlite3.sqlite_version_info)
-print(sqlite3.__file__)
+#print(sqlite3.version_info)
+#print(sqlite3.sqlite_version_info)
+#print(sqlite3.__file__)
 
 DBVERSION = 1
 DBDIR = os.path.join(os.environ['HOME'], '.config/mellow')
 DBFILE = 'mellow.db'
-
 SETTINGSDB = os.path.join(DBDIR, DBFILE)
-print(SETTINGSDB)
 
 
 def settings():
@@ -48,7 +46,7 @@ def login():
 	username = ('michiel',)
 
 	for row in settingsdb.execute('SELECT username, password, host, port, created FROM userinfo WHERE username=?', username):
-		print(row)
+		#print(row)
 		userinfo = {'username': row[0], 'password': row[1], 'host': row[2], 'port': row[3], 'created': row[4]}
 		return userinfo
 
