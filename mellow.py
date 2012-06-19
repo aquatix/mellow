@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 from gi.repository import Gtk
 from pprint import pprint
 #import sqlite3
@@ -16,7 +16,6 @@ import settings
 import cache
 
 appsettings = settings.settings()
-
 userinfo = ''
 
 
@@ -26,39 +25,16 @@ class MainWindow(Gtk.Window):
 		Gtk.Window.__init__(self, title="Mellow")
 
 		# Start the grid
-		self.box = Gtk.Box(spacing=6)
-		self.add(self.box)
+		self.grid = Gtk.Grid()
+		self.add(self.grid)
 
 		self.connectButton = Gtk.Button(label="Connect")
 		self.connectButton.connect("clicked", self.on_connectbutton_clicked)
 		#self.add(self.button)
-		self.box.pack_start(self.connectButton, True, True, 0)
+		self.grid.add(self.connectButton)
 
 
 		# Artists list
-		self.liststore = Gtk.ListStore(str, str)
-		self.liststore.append(["Fedora", "http://fedoraproject.org/"])
-		self.liststore.append(["Slackware", "http://www.slackware.com/"])
-		self.liststore.append(["Sidux", "http://sidux.com/"])
-
-		treeview = Gtk.TreeView(model=self.liststore)
-
-		renderer_text = Gtk.CellRendererText()
-		column_text = Gtk.TreeViewColumn("Text", renderer_text, text=0)
-		treeview.append_column(column_text)
-
-		renderer_editabletext = Gtk.CellRendererText()
-		renderer_editabletext.set_property("editable", True)
-
-		column_editabletext = Gtk.TreeViewColumn("Editable Text", renderer_editabletext, text=1)
-		treeview.append_column(column_editabletext)
-
-		#renderer_editabletext.connect("edited", self.text_edited)
-
-		self.box.pack_start(treeview, True, True, 0)
-		#self.add(treeview)
-
-
 		self.load_artist_list()
 
 
@@ -110,8 +86,19 @@ class MainWindow(Gtk.Window):
 
 		#renderer_editabletext.connect("edited", self.text_edited)
 
-		mainwindow.box.pack_start(artisttreeview, True, True, 0)
+		#mainwindow.box.pack_start(artisttreeview, True, True, 0)
+		mainwindow.grid.attach_next_to(artisttreeview, mainwindow.connectButton, Gtk.PositionType.BOTTOM, 1, 2)
 
+
+
+	def load_albumlist(artist, albums):
+		# Allow sorting on the column
+		#self.tvcolumn.set_sort_column_id(0)
+
+		# Allow drag and drop reordering of rows
+		#self.treeview.set_reorderable(True)
+
+		return 42
 
 
 	def on_connectbutton_clicked(self, widget):
