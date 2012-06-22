@@ -1,3 +1,13 @@
+20120622
+git clone ...
+# switch to python3 branch of the library
+git checkout python3
+
+# copy connection.py, errors.py, __init__.py to:
+/usr/local/lib/python3.2/dist-packages/libsonic
+
+
+20120618
 
 py-sonic
 
