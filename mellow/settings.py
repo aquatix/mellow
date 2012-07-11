@@ -23,7 +23,7 @@ def settings():
 	if not os.path.isdir(DBDIR):
 		os.makedirs(DBDIR)
 	if not os.path.isfile(SETTINGSDB):
-		self.createdb()
+		createdb()
 
 
 	settingsdb = sqlite3.connect(SETTINGSDB)
@@ -44,12 +44,16 @@ def login():
 
 	# for the time, default to 'michiel'
 	username = ('michiel',)
+	userinfo = {}
 
 	for row in settingsdb.execute('SELECT username, password, host, port, created FROM userinfo WHERE username=?', username):
-		#print(row)
+		print(row)
 		userinfo = {'username': row[0], 'password': row[1], 'host': row[2], 'port': row[3], 'created': row[4]}
-		return userinfo
+		print('userinfo:')
+		print(userinfo)
+		#return userinfo
 
+	return userinfo
 	#settingsdb.execute('SELECT * FROM userinfo WHERE username=?', username)
 	#pprint(settingsdb)
 	#return settingsdb.fetchone()

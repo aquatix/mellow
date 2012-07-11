@@ -75,6 +75,7 @@ class MainWindow(Gtk.Window):
 		"""
 		# fetch artists, @TODO: has ifModifiedSince for caching
 		userinfo = settings.login()
+		print(userinfo)
 		conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
 
 		artists = conn.getIndexes()
