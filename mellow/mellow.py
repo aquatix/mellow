@@ -78,6 +78,10 @@ class MainWindow(Gtk.Window):
 		userinfo = settings.login()
 		print(userinfo)
 
+		if {} == userinfo:
+			print("Login failed!")
+			return
+
 		try:
 			conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
 			print("conn:")
