@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from gi.repository import Gtk
 from pprint import pprint
+import urllib
 #import sqlite3
 
 #from "../py-sonic/py-sonic/"
@@ -77,13 +78,19 @@ class MainWindow(Gtk.Window):
 		userinfo = settings.login()
 		print(userinfo)
 
-		if {} == userinfo:
-			print("Login failed!")
-			return
+		try:
+			conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
+			print("conn:")
+			pprint(conn)
+		except urllib.error.HTTPError:
+			print("User/pass fail")
 
-		conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
-
-		artists = conn.getIndexes()
+		print ("Getting artists")
+		try:
+			artists = conn.getIndexes()
+		except urllib.error.HTTPError:
+			print("authfail while getting artists")
+			return -1
 		#pprint(artists)
 
 		mainwindow.artistliststore.clear()
