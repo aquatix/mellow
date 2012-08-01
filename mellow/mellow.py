@@ -47,11 +47,19 @@ class MainWindow(Gtk.Window):
 		self.grid.add(self.connectButton)
 
 
+		self.scrolledwindow = Gtk.ScrolledWindow()
+		self.scrolledwindow.set_hexpand(True)
+		self.scrolledwindow.set_vexpand(True)
+		#self.grid.attach(scrolledwindow, 0, 1, 3, 1)
+		self.grid.attach_next_to(self.scrolledwindow, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
+
+
 		# Artists list
 		self.artistliststore = Gtk.ListStore(int, str)
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
 		#self.artisttreeview.set_fixed_height_mode(True)
-		self.grid.attach_next_to(self.artisttreeview, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
+		#self.grid.attach_next_to(self.artisttreeview, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
+		self.scrolledwindow.add(self.artisttreeview)
 
 		self.load_artist_list()
 
