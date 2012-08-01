@@ -47,11 +47,11 @@ class MainWindow(Gtk.Window):
 		self.grid.add(self.connectButton)
 
 
-		self.scrolledwindow = Gtk.ScrolledWindow()
-		self.scrolledwindow.set_hexpand(True)
-		self.scrolledwindow.set_vexpand(True)
-		#self.grid.attach(scrolledwindow, 0, 1, 3, 1)
-		self.grid.attach_next_to(self.scrolledwindow, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
+		self.artistscroll = Gtk.ScrolledWindow()
+		self.artistscroll.set_hexpand(True)
+		self.artistscroll.set_vexpand(True)
+		#self.grid.attach(artistscroll, 0, 1, 3, 1)
+		self.grid.attach_next_to(self.artistscroll, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
 
 
 		# Artists list
@@ -59,14 +59,20 @@ class MainWindow(Gtk.Window):
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
 		#self.artisttreeview.set_fixed_height_mode(True)
 		#self.grid.attach_next_to(self.artisttreeview, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
-		self.scrolledwindow.add(self.artisttreeview)
+		self.artistscroll.add(self.artisttreeview)
 
 		self.load_artist_list()
 
 		# Album list
+		self.albumscroll = Gtk.ScrolledWindow()
+		self.albumscroll.set_hexpand(True)
+		self.albumscroll.set_vexpand(True)
+		self.grid.attach_next_to(self.albumscroll, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
+
 		self.albumliststore = Gtk.ListStore(int, str)
 		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
-		self.grid.attach_next_to(self.albumtreeview, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
+		#self.grid.attach_next_to(self.albumtreeview, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
+		self.albumscroll.add(self.albumtreeview)
 
 		pprint(self.artistliststore.get(0))
 		#self.load_album_list(self.artistliststore.get(1))
