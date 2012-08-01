@@ -119,9 +119,12 @@ class MainWindow(Gtk.Window):
 			thisLetter = artistLetter['name']
 			#print(thisLetter)
 
-			if thisLetter == 'A':
-				for thisArtist in theseArtists:
-					mainwindow.artistliststore.append([thisArtist['id'], thisArtist['name']])
+			#if thisLetter == 'A':
+			#	for thisArtist in theseArtists:
+			#		mainwindow.artistliststore.append([thisArtist['id'], thisArtist['name']])
+
+			for thisArtist in theseArtists:
+				mainwindow.artistliststore.append([thisArtist['id'], thisArtist['name']])
 
 		#renderer_text = Gtk.CellRendererText()
 		#column_text = Gtk.TreeViewColumn("ID", renderer_text, text=0)
