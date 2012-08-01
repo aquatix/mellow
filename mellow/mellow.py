@@ -36,42 +36,49 @@ class MainWindow(Gtk.Window):
 		#self.hpan.pack1(self.vpan, False, True)
 
 
-
 		# Start the grid
 		self.grid = Gtk.Grid()
 		self.add(self.grid)
 
-		self.connectButton = Gtk.Button(label="Connect")
-		self.connectButton.connect("clicked", self.on_connectbutton_clicked)
+		self.toolBar = Gtk.Toolbar()
+		self.grid.add(self.toolBar)
+
+		#self.connectButton = Gtk.Button(label="Connect")
+		#self.connectButton.connect("clicked", self.on_connectbutton_clicked)
 		#self.add(self.button)
-		self.grid.add(self.connectButton)
+		#self.grid.add(self.connectButton)
+
+		self.connectButton = Gtk.ToolButton()
+		self.connectButton.set_property("visible",True)
+		self.connectButton.set_property("icon_name","list-add-symbolic")
+		self.connectButton.connect("clicked", self.on_connectbutton_clicked)
+		self.toolBar.add(self.connectButton)
 
 
+		# Artists list
 		self.artistscroll = Gtk.ScrolledWindow()
 		self.artistscroll.set_hexpand(True)
 		self.artistscroll.set_vexpand(True)
 		#self.grid.attach(artistscroll, 0, 1, 3, 1)
-		self.grid.attach_next_to(self.artistscroll, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
+		self.grid.attach_next_to(self.artistscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 1)
 
-
-		# Artists list
 		self.artistliststore = Gtk.ListStore(int, str)
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
-		#self.artisttreeview.set_fixed_height_mode(True)
-		#self.grid.attach_next_to(self.artisttreeview, self.connectButton, Gtk.PositionType.BOTTOM, 1, 1)
 		self.artistscroll.add(self.artisttreeview)
 
 		self.load_artist_list()
+
 
 		# Album list
 		self.albumscroll = Gtk.ScrolledWindow()
 		self.albumscroll.set_hexpand(True)
 		self.albumscroll.set_vexpand(True)
-		self.grid.attach_next_to(self.albumscroll, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
+		#self.grid.attach_next_to(self.albumscroll, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
+		self.grid.attach_next_to(self.albumscroll, self.artistscroll, Gtk.PositionType.RIGHT, 1, 2)
 
 		self.albumliststore = Gtk.ListStore(int, str)
 		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
-		#self.grid.attach_next_to(self.albumtreeview, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
+		#self.albumtreeview.connect(
 		self.albumscroll.add(self.albumtreeview)
 
 		pprint(self.artistliststore.get(0))
@@ -113,11 +120,17 @@ class MainWindow(Gtk.Window):
 
 		mainwindow.artistliststore.clear()
 
+		previousLetter = ''
+
 		for artistLetter in artists['indexes']['index']:
 			#pprint(artistLetter)
 			theseArtists = artistLetter['artist']
 			thisLetter = artistLetter['name']
 			#print(thisLetter)
+
+			if thisLetter != previousLetter:
+				print(thisLetter)
+				previousLetter = thisLetter
 
 			#if thisLetter == 'A':
 			#	for thisArtist in theseArtists:
