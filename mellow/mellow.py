@@ -112,6 +112,7 @@ class MainWindow(Gtk.Window):
 
 		print ("Getting artists")
 		try:
+			# @TODO: use ifModifiedSince with caching
 			artists = conn.getIndexes()
 		except urllib.error.HTTPError:
 			print("authfail while getting artists")
