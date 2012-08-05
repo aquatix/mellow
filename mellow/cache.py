@@ -44,11 +44,10 @@ def getArtists(serverInfo):
 
 	cachedb = sqlite3.connect(os.path.join(cachedir, CACHEDBFILE))
 	dbcursor = cachedb.cursor()
-	for row in dbcursor.execute("SELECT * from artists;"):
-		currentArtist = dbcursor.fetchone()
+	for currentArtist in dbcursor.execute("SELECT * from artists;"):
 		#print(currentArtist)
 		if None != currentArtist:
-			artists.append({'id': currentArtist[0], 'name': currentArtist[1], 'indexLetter': currentArtist[2]})
+			artists.append({'id': currentArtist[0], 'name': str(currentArtist[1]), 'indexLetter': currentArtist[2]})
 
 	#pprint(artists)
 
@@ -137,8 +136,8 @@ def createdb(serverInfo):
 	cachedb.execute("INSERT INTO cacheinfo values ({0}, {1}, {2}, strftime('now'));".format(CACHEDBVERSION, 1, 1))
 
 	cachedb.execute("CREATE TABLE artists(artistID INTEGER, name STRING, indexLetter STRING);")
-	cachedb.execute("CREATE TABLE albums(artistID INTEGER, name STRING, indexLetter STRING);")
-	cachedb.execute("CREATE TABLE tracks(username STRING, password STRING, host STRING, port INTEGER, created INTEGER);")
+	cachedb.execute("CREATE TABLE albums(albumID INTEGER, parentID INTEGER, album STRING, title STRING, artist STRING, isDir BOOLEAN, coverart INTEGER, created STRING);")
+	cachedb.execute("CREATE TABLE tracks(trackID INTEGER, albumID INTEGER, parentID INTEGER, album STRING, title STRING, artist STRING, artistID INTEGER, genre STRING, year INTEGER, type STRING, contentType STRING, duration INTEGER, bitrate INTEGER, size INTEGER, isVideo BOOLEAN, path STRING, suffix STRING, created STRING);")
 
 	cachedb.commit()
 	cachedb.close()

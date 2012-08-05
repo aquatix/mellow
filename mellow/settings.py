@@ -47,11 +47,10 @@ def getServerInfo():
 	userinfo = {}
 
 	for row in settingsdb.execute('SELECT username, password, host, port, created FROM userinfo WHERE username=?', username):
-		print(row)
+		#print(row)
 		userinfo = {'username': row[0], 'password': row[1], 'host': row[2], 'port': row[3], 'created': row[4]}
-		print('userinfo:')
-		print(userinfo)
-		#return userinfo
+		#print('userinfo:')
+		#print(userinfo)
 
 	return userinfo
 	#settingsdb.execute('SELECT * FROM userinfo WHERE username=?', username)

@@ -103,6 +103,8 @@ class MainWindow(Gtk.Window):
 
 		self.artistliststore = Gtk.ListStore(int, str)
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
+		select = self.artisttreeview.get_selection()
+		select.connect("changed", self.onArtistViewchanged)
 		self.artistscroll.add(self.artisttreeview)
 
 		self.loadArtistList()
@@ -153,6 +155,7 @@ class MainWindow(Gtk.Window):
 		previousLetter = ''
 
 		for artist in artists:
+			print(artist)
 			thisLetter = artist['indexLetter']
 			#print(thisLetter)
 
@@ -179,14 +182,28 @@ class MainWindow(Gtk.Window):
 
 
 
-	def loadAlbumList(artist, albums):
+	#def loadAlbumList(artist, albums):
+	def loadAlbumList(mainwindow, artistid):
 		# Allow sorting on the column
 		#self.tvcolumn.set_sort_column_id(0)
 
 		# Allow drag and drop reordering of rows
 		#self.treeview.set_reorderable(True)
 
+		serverinfo = settings.getServerInfo()
+		conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
+		albums = conn.getMusicDirectory(artistid)
+		pprint(albums)
+
 		return 42
+
+
+	def onArtistViewchanged(self, selection):
+		model, treeiter = selection.get_selected()
+		if treeiter != None:
+			print("You selected", model[treeiter][0])
+			self.loadAlbumList(model[treeiter][0])
+
 
 
 
