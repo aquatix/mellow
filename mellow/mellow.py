@@ -100,36 +100,47 @@ class MainWindow(Gtk.Window):
 		print(userinfo)
 
 		hasCache = cache.haveCachedArtists(userinfo)
+		print (hasCache)
 
-		if {} == userinfo:
-			print("Login failed!")
-			return
+		if False == hasCache:
 
-		try:
-			conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
-			print("conn:")
-			pprint(conn)
-		except urllib.error.HTTPError:
-			print("User/pass fail")
+			if {} == userinfo:
+				print("Login failed!")
+				return
 
-		print ("Getting artists")
-		try:
-			# @TODO: use ifModifiedSince with caching
-			artists = conn.getIndexes()
-		except urllib.error.HTTPError:
-			print("authfail while getting artists")
-			return -1
+			try:
+				conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
+				print("conn:")
+				pprint(conn)
+			except urllib.error.HTTPError:
+				print("User/pass fail")
+
+			print ("Getting artists")
+			try:
+				# @TODO: use ifModifiedSince with caching
+				artists = conn.getIndexes()
+			except urllib.error.HTTPError:
+				print("authfail while getting artists")
+				return -1
+			pprint(artists)
+			cache.saveArtists(userinfo, artists)
+
+
+		else:
+			print("get from cache")
+
+
+		artists = cache.getArtists(userinfo)
 		pprint(artists)
+		#return
 
 		mainwindow.artistliststore.clear()
-
 		previousLetter = ''
 
-		for artistLetter in artists['indexes']['index']:
-			#pprint(artistLetter)
-			theseArtists = artistLetter['artist']
-			thisLetter = artistLetter['name']
-			#print(thisLetter)
+		#for artistLetter in artists['indexes']['index']:
+		for artist in artists:
+			thisLetter = artist['indexLetter']
+			print(thisLetter)
 
 			if thisLetter != previousLetter:
 				print(thisLetter)
@@ -139,8 +150,7 @@ class MainWindow(Gtk.Window):
 			#	for thisArtist in theseArtists:
 			#		mainwindow.artistliststore.append([thisArtist['id'], thisArtist['name']])
 
-			for thisArtist in theseArtists:
-				mainwindow.artistliststore.append([thisArtist['id'], thisArtist['name']])
+			mainwindow.artistliststore.append([artist['id'], artist['name']])
 
 		#renderer_text = Gtk.CellRendererText()
 		#column_text = Gtk.TreeViewColumn("ID", renderer_text, text=0)
