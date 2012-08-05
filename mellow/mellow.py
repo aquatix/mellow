@@ -99,6 +99,8 @@ class MainWindow(Gtk.Window):
 		userinfo = settings.login()
 		print(userinfo)
 
+		hasCache = cache.haveCachedArtists(userinfo)
+
 		if {} == userinfo:
 			print("Login failed!")
 			return
@@ -117,7 +119,7 @@ class MainWindow(Gtk.Window):
 		except urllib.error.HTTPError:
 			print("authfail while getting artists")
 			return -1
-		#pprint(artists)
+		pprint(artists)
 
 		mainwindow.artistliststore.clear()
 
