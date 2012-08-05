@@ -17,10 +17,12 @@ import settings
 import cache
 
 appsettings = settings.settings()
-userinfo = ''
+serverinfo = ''
 
 
 class MainWindow(Gtk.Window):
+
+	# == GUI Elements ======
 
 	def __init__(self):
 		Gtk.Window.__init__(self, title="Mellow")
@@ -40,19 +42,56 @@ class MainWindow(Gtk.Window):
 		self.grid = Gtk.Grid()
 		self.add(self.grid)
 
+
+		# Toolbar above the artists list
 		self.toolBar = Gtk.Toolbar()
 		self.grid.add(self.toolBar)
+		context = self.toolBar.get_style_context()
+		context.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
+
 
 		#self.connectButton = Gtk.Button(label="Connect")
-		#self.connectButton.connect("clicked", self.on_connectbutton_clicked)
+		#self.connectButton.connect("clicked", self.onConnectbuttonClicked)
 		#self.add(self.button)
 		#self.grid.add(self.connectButton)
 
-		self.connectButton = Gtk.ToolButton()
+		#self.connectButton = Gtk.ToolButton()
+		self.connectButton = Gtk.ToolButton(stock_id=Gtk.STOCK_CONNECT)
 		self.connectButton.set_property("visible",True)
-		self.connectButton.set_property("icon_name","list-add-symbolic")
-		self.connectButton.connect("clicked", self.on_connectbutton_clicked)
+		#self.connectButton.set_property("icon_name","list-add-symbolic")
+		self.connectButton.connect("clicked", self.onConnectbuttonClicked)
 		self.toolBar.add(self.connectButton)
+
+
+		self.refreshButton = Gtk.ToolButton()
+		self.refreshButton.set_property("visible",True)
+		self.refreshButton.set_property("icon_name","view-refresh")
+		self.refreshButton.set_label("Refresh artists from server")
+		self.refreshButton.connect("clicked", self.onRefreshbuttonClicked)
+		self.toolBar.add(self.refreshButton)
+
+
+		# Playback toolbar with the widgets you might expect there
+		self.playbackToolBar = Gtk.Toolbar()
+		self.grid.add(self.playbackToolBar)
+		context = self.playbackToolBar.get_style_context()
+		context.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
+
+		self.previousButtonButton = Gtk.ToolButton(stock_id=Gtk.STOCK_MEDIA_PREVIOUS)
+		self.previousButtonButton.connect("clicked", self.onPreviousButtonbuttonClicked)
+		self.playbackToolBar.add(self.previousButtonButton)
+
+		self.playButton = Gtk.ToolButton(stock_id=Gtk.STOCK_MEDIA_PLAY)
+		self.playButton.connect("clicked", self.onPlaybuttonClicked)
+		self.playbackToolBar.add(self.playButton)
+
+		self.stopButton = Gtk.ToolButton(stock_id=Gtk.STOCK_MEDIA_STOP)
+		self.stopButton.connect("clicked", self.onStopbuttonClicked)
+		self.playbackToolBar.add(self.stopButton)
+
+		self.nextButton = Gtk.ToolButton(stock_id=Gtk.STOCK_MEDIA_NEXT)
+		self.nextButton.connect("clicked", self.onNextbuttonClicked)
+		self.playbackToolBar.add(self.nextButton)
 
 
 		# Artists list
@@ -66,7 +105,7 @@ class MainWindow(Gtk.Window):
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
 		self.artistscroll.add(self.artisttreeview)
 
-		self.load_artist_list()
+		self.loadArtistList()
 
 
 		# Album list
@@ -82,7 +121,7 @@ class MainWindow(Gtk.Window):
 		self.albumscroll.add(self.albumtreeview)
 
 		pprint(self.artistliststore.get(0))
-		#self.load_album_list(self.artistliststore.get(1))
+		#self.loadAlbumList(self.artistliststore.get(1))
 
 
 		#self.set_default_size(gtk.gdk.screen_width(),500)
@@ -91,64 +130,35 @@ class MainWindow(Gtk.Window):
 
 
 
-	def load_artist_list(mainwindow):
+	def loadArtistList(mainwindow):
 		"""
 		Refresh artists listing
 		"""
 		# fetch artists, @TODO: has ifModifiedSince for caching
-		userinfo = settings.login()
-		print(userinfo)
+		serverinfo = settings.getServerInfo()
+		print(serverinfo)
 
-		hasCache = cache.haveCachedArtists(userinfo)
-		print (hasCache)
+		hasCache = cache.haveCachedArtists(serverinfo)
 
 		if False == hasCache:
-
-			if {} == userinfo:
-				print("Login failed!")
-				return
-
-			try:
-				conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
-				print("conn:")
-				pprint(conn)
-			except urllib.error.HTTPError:
-				print("User/pass fail")
-
-			print ("Getting artists")
-			try:
-				# @TODO: use ifModifiedSince with caching
-				artists = conn.getIndexes()
-			except urllib.error.HTTPError:
-				print("authfail while getting artists")
-				return -1
-			pprint(artists)
-			cache.saveArtists(userinfo, artists)
-
-
+			artists = mainwindow.getArtistsFromServer(serverinfo)
+			cache.saveArtists(serverinfo, artists)
 		else:
 			print("get from cache")
 
 
-		artists = cache.getArtists(userinfo)
-		pprint(artists)
-		#return
+		artists = cache.getArtists(serverinfo)
 
 		mainwindow.artistliststore.clear()
 		previousLetter = ''
 
-		#for artistLetter in artists['indexes']['index']:
 		for artist in artists:
 			thisLetter = artist['indexLetter']
-			print(thisLetter)
+			#print(thisLetter)
 
 			if thisLetter != previousLetter:
 				print(thisLetter)
 				previousLetter = thisLetter
-
-			#if thisLetter == 'A':
-			#	for thisArtist in theseArtists:
-			#		mainwindow.artistliststore.append([thisArtist['id'], thisArtist['name']])
 
 			mainwindow.artistliststore.append([artist['id'], artist['name']])
 
@@ -169,7 +179,7 @@ class MainWindow(Gtk.Window):
 
 
 
-	def load_album_list(artist, albums):
+	def loadAlbumList(artist, albums):
 		# Allow sorting on the column
 		#self.tvcolumn.set_sort_column_id(0)
 
@@ -179,18 +189,75 @@ class MainWindow(Gtk.Window):
 		return 42
 
 
-	def on_connectbutton_clicked(self, widget):
+
+	# == Buttons ======
+
+	def onRefreshbuttonClicked(self, widget):
+		print("Refreshing...")
+		serverinfo = settings.getServerInfo()
+		cache.clearArtists(serverinfo)
+		cache.saveArtists(serverinfo, self.getArtistsFromServer(serverinfo))
+		#loadArtistList(self)
+
+
+	def onPreviousButtonbuttonClicked(self, widget):
+		print("Skipping backward")
+
+
+	def onNextbuttonClicked(self, widget):
+		print("Skipping forward")
+
+
+	def onPlaybuttonClicked(self, widget):
+		print("Beginning playback")
+
+
+	def onStopbuttonClicked(self, widget):
+		print("Stop playback")
+
+
+
+	def onConnectbuttonClicked(self, widget):
 		print("Connecting...")
 
 		#settings.createdb()
-		userinfo = settings.login()
-		#pprint(userinfo)
+		serverinfo = settings.getServerInfo()
+		#pprint(serverinfo)
 
-		conn = libsonic.Connection(userinfo['host'], userinfo['username'], userinfo['password'], userinfo['port'])
+		conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
 
 		songs = conn.getRandomSongs(size=2)
 		pprint(songs)
 
+
+
+	# == Subsonic remote ======
+
+	def getArtistsFromServer(self,serverinfo):
+		if {} == serverinfo:
+			print("Login failed!")
+			return
+
+		try:
+			conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
+			print("conn:")
+			pprint(conn)
+		except urllib.error.HTTPError:
+			print("User/pass fail")
+
+		print ("Getting artists")
+		try:
+			# @TODO: use ifModifiedSince with caching
+			artists = conn.getIndexes()
+		except urllib.error.HTTPError:
+			print("authfail while getting artists")
+			return -1
+		pprint(artists)
+		return artists
+
+
+
+# Initialise and create the main window of the program
 win = MainWindow()
 win.connect("delete-event", Gtk.main_quit)
 win.show_all()

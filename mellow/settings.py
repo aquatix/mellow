@@ -33,7 +33,7 @@ def settings():
 		return settingsinfo
 
 
-def login():
+def getServerInfo():
 	"""
 	since: 0.0.1
 

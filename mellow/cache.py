@@ -22,6 +22,18 @@ def haveCachedArtists(serverInfo):
 		return True
 
 
+def clearArtists(serverInfo):
+	"""
+	Deletes the artist cache
+	"""
+	cachedir = initCache(serverInfo)
+
+	cachedb = sqlite3.connect(os.path.join(cachedir, CACHEDBFILE))
+	dbcursor = cachedb.cursor()
+	dbcursor.execute("DELETE from artists;")
+	cachedb.commit()
+
+
 def getArtists(serverInfo):
 	"""
 	Get the list of artists from the cache
@@ -34,7 +46,7 @@ def getArtists(serverInfo):
 	dbcursor = cachedb.cursor()
 	for row in dbcursor.execute("SELECT * from artists;"):
 		currentArtist = dbcursor.fetchone()
-		print(currentArtist)
+		#print(currentArtist)
 		if None != currentArtist:
 			artists.append({'id': currentArtist[0], 'name': currentArtist[1], 'indexLetter': currentArtist[2]})
 
@@ -70,7 +82,8 @@ def saveArtists(serverInfo, artists):
 	#	    ]
 	#c.executemany('INSERT INTO stocks VALUES (?,?,?,?,?)', purchases)
 
-	return theArtists.count()
+	#return theArtists.count()
+	return True
 
 
 def getCacheDir(serverInfo):
@@ -91,10 +104,16 @@ def initCache(serverInfo):
 
 	if os.path.isfile(os.path.join(cachedir, CACHEDBFILE)):
 		cachedb = sqlite3.connect(os.path.join(cachedir, CACHEDBFILE))
-		result = cachedb.execute("SELECT dbVersion from cacheinfo;")
-		pprint(result)
+		dbcursor = cachedb.cursor()
+		dbcursor.execute("SELECT dbVersion from cacheinfo;")
+		cacheVersion = dbcursor.fetchone()
 
-	# Check whether the settings db exists
+		if CACHEDBVERSION != cacheVersion[0]:
+			# CacheDB version has changed, delete old cache file as it's incompatible
+			print("Removing old cache file {} with version {} as version {} is needed".format(os.path.join(cachedir, CACHEDBFILE), cacheVersion[0], CACHEDBVERSION))
+			os.remove(os.path.join(cachedir, CACHEDBFILE))
+
+	# Check whether the settings db exists, create if not
 	if not os.path.isdir(cachedir):
 		os.makedirs(cachedir)
 	if not os.path.isfile(os.path.join(cachedir, CACHEDBFILE)):
