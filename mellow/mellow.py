@@ -257,19 +257,25 @@ class MainWindow(Gtk.Window):
 
 		try:
 			conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
-			print("conn:")
-			pprint(conn)
 		except urllib.error.HTTPError:
 			print("User/pass fail")
 
 		print ("Getting artists")
 		try:
 			# @TODO: use ifModifiedSince with caching
-			artists = conn.getIndexes()
+			pprint(conn.apiVersion)
+			if ('1.8.0' == conn.apiVersion):
+				print("getArtists()")
+				artists = conn.getArtists()
+				artists = artists["artists"]
+			else:
+				print("getIndexes()")
+				artists = conn.getIndexes()
+				artists = artists["indexes"]
 		except urllib.error.HTTPError:
 			print("authfail while getting artists")
 			return -1
-		pprint(artists)
+		#pprint(artists)
 		return artists
 
 

@@ -4,7 +4,7 @@ from pprint import pprint
 
 CACHEDBVERSION = 1
 CACHEDIR = os.path.join(os.environ['HOME'], '.cache/mellow')
-CACHEDBFILE = 'cache.db'
+CACHEDBFILE = 'cache.sqlite'
 #CACHEDB = os.path.join(CACHEDIR, CACHEDBFILE)
 
 
@@ -59,7 +59,8 @@ def saveArtists(serverInfo, artists):
 
 	theArtists = []
 
-	for artistLetter in artists['indexes']['index']:
+	#for artistLetter in artists['indexes']['index']:
+	for artistLetter in artists['index']:
 		theseArtists = artistLetter['artist']
 		thisLetter = artistLetter['name']
 
@@ -83,6 +84,39 @@ def saveArtists(serverInfo, artists):
 
 	#return theArtists.count()
 	return True
+
+
+def clearTracks(serverInfo):
+	"""
+	Deletes the album/track cache
+	"""
+	cachedir = initCache(serverInfo)
+
+	cachedb = sqlite3.connect(os.path.join(cachedir, CACHEDBFILE))
+	dbcursor = cachedb.cursor()
+	dbcursor.execute("DELETE from tracks;")
+	cachedb.commit()
+
+
+def getTracks(serverInfo, artistID):
+	"""
+	Get the list of artists from the cache
+	"""
+	cachedir = initCache(serverInfo)
+
+	artists = []
+
+	cachedb = sqlite3.connect(os.path.join(cachedir, CACHEDBFILE))
+	dbcursor = cachedb.cursor()
+	for currentArtist in dbcursor.execute("SELECT * from artists;"):
+		#print(currentArtist)
+		if None != currentArtist:
+			artists.append({'id': currentArtist[0], 'name': str(currentArtist[1]), 'indexLetter': currentArtist[2]})
+
+	#pprint(artists)
+
+	return artists
+
 
 
 def getCacheDir(serverInfo):

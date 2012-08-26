@@ -8,7 +8,7 @@ from pprint import pprint
 
 DBVERSION = 1
 DBDIR = os.path.join(os.environ['HOME'], '.config/mellow')
-DBFILE = 'mellow.db'
+DBFILE = 'mellow.sqlite'
 SETTINGSDB = os.path.join(DBDIR, DBFILE)
 
 
