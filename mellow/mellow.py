@@ -143,19 +143,21 @@ class MainWindow(Gtk.Window):
 		hasCache = cache.haveCachedArtists(serverinfo)
 
 		if False == hasCache:
-			artists = mainwindow.getArtistsFromServer(serverinfo)
-			cache.saveArtists(serverinfo, artists)
+			mainwindow.onRefreshbuttonClicked(mainwindow)
+			#artists = mainwindow.getArtistsFromServer(serverinfo)
+			#cache.saveArtists(serverinfo, artists)
 		else:
 			print("get from cache")
 
 
 		artists = cache.getArtists(serverinfo)
 
+
 		mainwindow.artistliststore.clear()
 		previousLetter = ''
 
 		for artist in artists:
-			print(artist)
+			#print(artist)
 			thisLetter = artist['indexLetter']
 			#print(thisLetter)
 
@@ -183,7 +185,7 @@ class MainWindow(Gtk.Window):
 
 
 	#def loadAlbumList(artist, albums):
-	def loadAlbumList(mainwindow, artistid):
+	def loadAlbumList(mainwindow, artistID):
 		# Allow sorting on the column
 		#self.tvcolumn.set_sort_column_id(0)
 
@@ -192,7 +194,9 @@ class MainWindow(Gtk.Window):
 
 		serverinfo = settings.getServerInfo()
 		conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
-		albums = conn.getMusicDirectory(artistid)
+		#albums = conn.getMusicDirectory(artistid)
+		#albums = conn.getArtist(artistID)
+		albums = cache.getAlbums(serverinfo, artistID)
 		pprint(albums)
 
 		return 42
@@ -214,7 +218,15 @@ class MainWindow(Gtk.Window):
 		serverinfo = settings.getServerInfo()
 		cache.clearArtists(serverinfo)
 		cache.saveArtists(serverinfo, self.getArtistsFromServer(serverinfo))
-		#loadArtistList(self)
+		
+		artists = cache.getArtists(serverinfo)
+
+		print("also storing albums:")
+		cache.clearAlbums(serverinfo)
+		for artist in artists:
+			albums = self.getAlbumsFromServer(serverinfo, artist['id'])
+			cache.saveAlbums(serverinfo, albums)
+
 
 
 	def onPreviousButtonbuttonClicked(self, widget):
@@ -250,7 +262,7 @@ class MainWindow(Gtk.Window):
 
 	# == Subsonic remote ======
 
-	def getArtistsFromServer(self,serverinfo):
+	def getArtistsFromServer(self, serverinfo):
 		if {} == serverinfo:
 			print("Login failed!")
 			return
@@ -263,7 +275,7 @@ class MainWindow(Gtk.Window):
 		print ("Getting artists")
 		try:
 			# @TODO: use ifModifiedSince with caching
-			pprint(conn.apiVersion)
+			print("Using API ", conn.apiVersion)
 			if ('1.8.0' == conn.apiVersion):
 				print("getArtists()")
 				artists = conn.getArtists()
@@ -278,6 +290,34 @@ class MainWindow(Gtk.Window):
 		#pprint(artists)
 		return artists
 
+
+	def getAlbumsFromServer(self, serverinfo, artistID):
+		if {} == serverinfo:
+			print("Login failed!")
+			return
+
+		try:
+			conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
+		except urllib.error.HTTPError:
+			print("User/pass fail")
+
+		print ("Getting albums for artist ", artistID)
+		#albums = conn.getArtist(artistID)
+		#pprint(albums)
+		#albums = albums["artist"]
+		try:
+			# @TODO: use ifModifiedSince with caching
+			if ('1.8.0' == conn.apiVersion):
+				#print("getArtist", artistID)
+				albums = conn.getArtist(artistID)
+				albums = albums["artist"]
+			else:
+				print("API version unsupported: need 1.8.0 or newer")
+		except urllib.error.HTTPError:
+			print("authfail while getting albums")
+			return -1
+		#pprint(albums)
+		return albums
 
 
 # Initialise and create the main window of the program
