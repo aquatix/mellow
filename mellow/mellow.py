@@ -1,8 +1,12 @@
 #!/usr/bin/python3
 from gi.repository import Gtk
+from gi.repository import GLib
+
 from pprint import pprint
 import urllib
 #import sqlite3
+
+import threading
 
 #from "../py-sonic/py-sonic/"
 #from importlib import import_module
@@ -18,6 +22,10 @@ import cache
 
 appsettings = settings.settings()
 serverinfo = ''
+
+
+# Use threads                                       
+GLib.threads_init()
 
 
 class MainWindow(Gtk.Window):
@@ -214,20 +222,9 @@ class MainWindow(Gtk.Window):
 	# == Buttons ======
 
 	def onRefreshbuttonClicked(self, widget):
-		print("Refreshing...")
-		serverinfo = settings.getServerInfo()
-		cache.clearArtists(serverinfo)
-		cache.saveArtists(serverinfo, self.getArtistsFromServer(serverinfo))
-		
-		artists = cache.getArtists(serverinfo)
-
-		print("also storing albums:")
-		cache.clearAlbums(serverinfo)
-		result = self.cacheAllAlbumsFromServer(serverinfo, artists)
-		#for artist in artists:
-		#	albums = self.getAlbumsFromServer(serverinfo, artist['id'])
-		#	cache.saveAlbums(serverinfo, albums)
-
+		refreshThread = self.UpdateFromServerThread(self)
+		refreshThread.setDaemon(True)
+		refreshThread.start()
 
 
 	def onPreviousButtonbuttonClicked(self, widget):
@@ -261,67 +258,99 @@ class MainWindow(Gtk.Window):
 
 
 
-	# == Subsonic remote ======
+	# == Subsonic remote data retrieval ======
 
-	def getArtistsFromServer(self, serverinfo):
-		if {} == serverinfo:
-			print("Login failed!")
-			return
-
-		try:
-			conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
-		except urllib.error.HTTPError:
-			print("User/pass fail")
-
-		print ("Getting artists")
-		try:
-			# @TODO: use ifModifiedSince with caching
-			print("Using API ", conn.apiVersion)
-			if ('1.8.0' == conn.apiVersion):
-				print("getArtists()")
-				artists = conn.getArtists()
-				artists = artists["artists"]
-			else:
-				print("getIndexes()")
-				artists = conn.getIndexes()
-				artists = artists["indexes"]
-		except urllib.error.HTTPError:
-			print("authfail while getting artists")
-			return -1
-		except KeyError, e:
-			print("[getArtistsFromServer] KeyError: something was wrong with the data")
-			return -1
-		#pprint(artists)
-		return artists
+	class UpdateFromServerThread(threading.Thread):
+		def __init__(self, mainwindow):
+			threading.Thread.__init__(self)
+			self.mainwindow = mainwindow
+			pprint(mainwindow)
+			pprint(self.mainwindow)
 
 
-	def cacheAllAlbumsFromServer(self, serverinfo, artists):
-		if {} == serverinfo:
-			print("Login failed!")
-			return
+		def run(self):
+			print("Refreshing...")
+			serverinfo = settings.getServerInfo()
+			cache.clearArtists(serverinfo)
+			cache.saveArtists(serverinfo, self.getArtistsFromServer(serverinfo))
+			
+			# refresh artist list in window
+			self.mainwindow.loadArtistList()
+			
+			artists = cache.getArtists(serverinfo)
 
-		try:
-			conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
-		except urllib.error.HTTPError:
-			print("User/pass fail")
+			print("also storing albums:")
+			cache.clearAlbums(serverinfo)
+			
+			result = self.cacheAllAlbumsFromServer(serverinfo, artists)
 
-		for artist in artists:
-			#print ("Getting albums for artist ", artist['id'])
+			#print("Creating album download thread")
+			# Create thread to load albums from server with
+			#try:
+			#	threading.Thread( target = self.cacheAllAlbumsFromServer, (serverinfo, artists, ) ).start()
+			#except:
+			#	print "Error: unable to start thread"
+
+
+		def getArtistsFromServer(self, serverinfo):
+			if {} == serverinfo:
+				print("Login failed!")
+				return
+
+			try:
+				conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
+			except urllib.error.HTTPError:
+				print("User/pass fail")
+
+			print ("Getting artists")
 			try:
 				# @TODO: use ifModifiedSince with caching
+				print("Using API ", conn.apiVersion)
 				if ('1.8.0' == conn.apiVersion):
-					albums = conn.getArtist(artist['id'])
-					albums = albums["artist"]
+					print("getArtists()")
+					artists = conn.getArtists()
+					artists = artists["artists"]
 				else:
-					print("API version unsupported: need 1.8.0 or newer")
+					print("getIndexes()")
+					artists = conn.getIndexes()
+					artists = artists["indexes"]
 			except urllib.error.HTTPError:
-				print("authfail while getting albums")
+				print("authfail while getting artists")
 				return -1
 			except KeyError, e:
-				print("[getAllAlbumsFromServer] KeyError: something was wrong with the data")
+				print("[getArtistsFromServer] KeyError: something was wrong with the data")
 				return -1
-			cache.saveAlbums(serverinfo, albums)
-		return True
+			#pprint(artists)
+			return artists
+
+
+		def cacheAllAlbumsFromServer(self, serverinfo, artists):
+			if {} == serverinfo:
+				print("Login failed!")
+				return
+
+			try:
+				conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
+			except urllib.error.HTTPError:
+				print("User/pass fail")
+
+			for artist in artists:
+				print ("Getting albums for artist ", artist['id'])
+				try:
+					# @TODO: use ifModifiedSince with caching
+					if ('1.8.0' == conn.apiVersion):
+						albums = conn.getArtist(artist['id'])
+						albums = albums["artist"]
+					else:
+						print("API version unsupported: need 1.8.0 or newer")
+				except urllib.error.HTTPError:
+					print("authfail while getting albums")
+					return -1
+				except KeyError, e:
+					print("[getAllAlbumsFromServer] KeyError: something was wrong with the data")
+					return -1
+				cache.saveAlbums(serverinfo, albums)
+			return True
 
 
 	def getAlbumsFromServer(self, serverinfo, artistID):
