@@ -142,7 +142,7 @@ def saveAlbums(serverInfo, albums):
 
 	theAlbums = []
 
-	#print "caching album"
+	print("caching ? albums", albums['albumCount'])
 	if 1 == albums['albumCount']:
 		# Only one album, fix the list:
 		albums["album"] = [albums["album"]]
@@ -164,8 +164,9 @@ def saveAlbums(serverInfo, albums):
 	cachedir = initCache(serverInfo)
 
 	cachedb = sqlite3.connect(os.path.join(cachedir, CACHEDBFILE))
-	dbcursor = cachedb.cursor()
-	dbcursor.executemany('INSERT INTO albums VALUES (?,?,?,?,?,?,?,?)', theAlbums)
+	#dbcursor = cachedb.cursor()
+	#dbcursor.executemany('INSERT INTO albums VALUES (?,?,?,?,?,?,?,?)', theAlbums)
+	cachedb.executemany('INSERT INTO albums VALUES (?,?,?,?,?,?,?,?)', theAlbums)
 	cachedb.commit()
 	cachedb.close()
 

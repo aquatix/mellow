@@ -80,6 +80,9 @@ class MainWindow(Gtk.Window):
 		self.refreshButton.set_label("Refresh artists from server")
 		self.refreshButton.connect("clicked", self.onRefreshbuttonClicked)
 		self.toolBar.add(self.refreshButton)
+		
+		self.progressbar = Gtk.ProgressBar()
+		self.toolBar.add(self.progressbar)
 
 
 		# Playback toolbar with the widgets you might expect there
@@ -278,6 +281,8 @@ class MainWindow(Gtk.Window):
 				return
 
 			print("Refreshing...")
+			#self.mainwindow.progressbar.pulse()
+			
 			self.mainwindow.refreshing = True
 			serverinfo = settings.getServerInfo()
 			cache.clearArtists(serverinfo)
@@ -287,7 +292,7 @@ class MainWindow(Gtk.Window):
 			self.mainwindow.loadArtistList()
 			
 			artists = cache.getArtists(serverinfo)
-
+			
 			print("also storing albums:")
 			cache.clearAlbums(serverinfo)
 			
@@ -337,13 +342,25 @@ class MainWindow(Gtk.Window):
 			except urllib.error.HTTPError:
 				print("User/pass fail")
 
+			self.mainwindow.progressbar.set_fraction(0)
+			
+			allAlbums = {'album':[], 'albumCount':0}
+
+			counter = 0
 			for artist in artists:
-				print ("Getting albums for artist ", artist['id'])
+				counter += 1
+				if 0 == counter % 10:
+					self.mainwindow.progressbar.set_fraction((0.0 + counter) / len(artists))
+					#print(". ?", counter)
+				#print ("Getting albums for artist ", artist['id'])
 				try:
 					# @TODO: use ifModifiedSince with caching
 					if ('1.8.0' == conn.apiVersion):
 						albums = conn.getArtist(artist['id'])
 						albums = albums["artist"]
+						if 1 == albums['albumCount']:
+							# Only one album, fix the list:
+							albums["album"] = [albums["album"]]
 					else:
 						print("API version unsupported: need 1.8.0 or newer")
 				except urllib.error.HTTPError:
@@ -352,7 +369,9 @@ class MainWindow(Gtk.Window):
 				except KeyError, e:
 					print("[getAllAlbumsFromServer] KeyError: something was wrong with the data")
 					return -1
-				cache.saveAlbums(serverinfo, albums)
+				allAlbums['album'].extend(albums['album'])
+				allAlbums['albumCount'] = allAlbums['albumCount'] + albums['albumCount']
+			cache.saveAlbums(serverinfo, allAlbums)
 			return True
 
 
