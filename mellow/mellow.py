@@ -45,6 +45,7 @@ class MainWindow(Gtk.Window):
 		#self.vBox1.pack_end(self.hpan, True, True, 0)
 		#self.hpan.pack1(self.vpan, False, True)
 
+		self.refreshing = False
 
 		# Start the grid
 		self.grid = Gtk.Grid()
@@ -269,7 +270,13 @@ class MainWindow(Gtk.Window):
 
 
 		def run(self):
+			if True == self.mainwindow.refreshing:
+				# Already refreshing
+				print("Already refreshing from server, ignore")
+				return
+
 			print("Refreshing...")
+			self.mainwindow.refreshing = True
 			serverinfo = settings.getServerInfo()
 			cache.clearArtists(serverinfo)
 			cache.saveArtists(serverinfo, self.getArtistsFromServer(serverinfo))
@@ -283,13 +290,7 @@ class MainWindow(Gtk.Window):
 			cache.clearAlbums(serverinfo)
 			
 			result = self.cacheAllAlbumsFromServer(serverinfo, artists)
-
-			#print("Creating album download thread")
-			# Create thread to load albums from server with
-			#try:
-			#	threading.Thread( target = self.cacheAllAlbumsFromServer, (serverinfo, artists, ) ).start()
-			#except:
-			#	print "Error: unable to start thread"
+			self.mainwindow.refreshing = False
 
 
 		def getArtistsFromServer(self, serverinfo):
