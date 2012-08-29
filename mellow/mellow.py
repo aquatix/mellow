@@ -113,6 +113,7 @@ class MainWindow(Gtk.Window):
 		self.grid.attach_next_to(self.artistscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 1)
 		
 		self.progressbar = Gtk.ProgressBar()
+		self.progressbar.set_visible(False)
 		self.grid.attach_next_to(self.progressbar, self.artistscroll, Gtk.PositionType.BOTTOM, 1, 1)
 
 
@@ -344,6 +345,7 @@ class MainWindow(Gtk.Window):
 				print("User/pass fail")
 
 			self.mainwindow.progressbar.set_fraction(0)
+			self.mainwindow.progressbar.set_visible(True)
 			
 			allAlbums = {'album':[], 'albumCount':0}
 
@@ -374,6 +376,7 @@ class MainWindow(Gtk.Window):
 				allAlbums['album'].extend(albums['album'])
 				allAlbums['albumCount'] = allAlbums['albumCount'] + albums['albumCount']
 			cache.saveAlbums(serverinfo, allAlbums)
+			self.mainwindow.progressbar.set_visible(False)
 			return True
 
 
