@@ -81,9 +81,6 @@ class MainWindow(Gtk.Window):
 		self.refreshButton.connect("clicked", self.onRefreshbuttonClicked)
 		self.toolBar.add(self.refreshButton)
 		
-		self.progressbar = Gtk.ProgressBar()
-		self.toolBar.add(self.progressbar)
-
 
 		# Playback toolbar with the widgets you might expect there
 		self.playbackToolBar = Gtk.Toolbar()
@@ -114,6 +111,10 @@ class MainWindow(Gtk.Window):
 		self.artistscroll.set_vexpand(True)
 		#self.grid.attach(artistscroll, 0, 1, 3, 1)
 		self.grid.attach_next_to(self.artistscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 1)
+		
+		self.progressbar = Gtk.ProgressBar()
+		self.grid.attach_next_to(self.progressbar, self.artistscroll, Gtk.PositionType.BOTTOM, 1, 1)
+
 
 		self.artistliststore = Gtk.ListStore(int, str)
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
@@ -346,12 +347,13 @@ class MainWindow(Gtk.Window):
 			
 			allAlbums = {'album':[], 'albumCount':0}
 
+			#print("iterating over ? artists", len(artists))
 			counter = 0
 			for artist in artists:
 				counter += 1
-				if 0 == counter % 10:
+				if 0 == counter % 20:
 					self.mainwindow.progressbar.set_fraction((0.0 + counter) / len(artists))
-					#print(". ?", counter)
+					#print(". ? ?", (counter, (0.0 + counter) / len(artists),) )
 				#print ("Getting albums for artist ", artist['id'])
 				try:
 					# @TODO: use ifModifiedSince with caching
