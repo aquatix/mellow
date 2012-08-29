@@ -162,7 +162,7 @@ class MainWindow(Gtk.Window):
 			#print(thisLetter)
 
 			if thisLetter != previousLetter:
-				print(thisLetter)
+				#print(thisLetter)
 				previousLetter = thisLetter
 
 			mainwindow.artistliststore.append([artist['id'], artist['name']])
@@ -223,9 +223,10 @@ class MainWindow(Gtk.Window):
 
 		print("also storing albums:")
 		cache.clearAlbums(serverinfo)
-		for artist in artists:
-			albums = self.getAlbumsFromServer(serverinfo, artist['id'])
-			cache.saveAlbums(serverinfo, albums)
+		result = self.cacheAllAlbumsFromServer(serverinfo, artists)
+		#for artist in artists:
+		#	albums = self.getAlbumsFromServer(serverinfo, artist['id'])
+		#	cache.saveAlbums(serverinfo, albums)
 
 
 
@@ -287,8 +288,40 @@ class MainWindow(Gtk.Window):
 		except urllib.error.HTTPError:
 			print("authfail while getting artists")
 			return -1
+		except KeyError, e:
+			print("[getArtistsFromServer] KeyError: something was wrong with the data")
+			return -1
 		#pprint(artists)
 		return artists
+
+
+	def cacheAllAlbumsFromServer(self, serverinfo, artists):
+		if {} == serverinfo:
+			print("Login failed!")
+			return
+
+		try:
+			conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
+		except urllib.error.HTTPError:
+			print("User/pass fail")
+
+		for artist in artists:
+			#print ("Getting albums for artist ", artist['id'])
+			try:
+				# @TODO: use ifModifiedSince with caching
+				if ('1.8.0' == conn.apiVersion):
+					albums = conn.getArtist(artist['id'])
+					albums = albums["artist"]
+				else:
+					print("API version unsupported: need 1.8.0 or newer")
+			except urllib.error.HTTPError:
+				print("authfail while getting albums")
+				return -1
+			except KeyError, e:
+				print("[getAllAlbumsFromServer] KeyError: something was wrong with the data")
+				return -1
+			cache.saveAlbums(serverinfo, albums)
+		return True
 
 
 	def getAlbumsFromServer(self, serverinfo, artistID):
@@ -315,6 +348,9 @@ class MainWindow(Gtk.Window):
 				print("API version unsupported: need 1.8.0 or newer")
 		except urllib.error.HTTPError:
 			print("authfail while getting albums")
+			return -1
+		except KeyError, e:
+			print("[getAlbumsFromServer] KeyError: something was wrong with the data")
 			return -1
 		#pprint(albums)
 		return albums

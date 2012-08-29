@@ -66,7 +66,7 @@ def saveArtists(serverInfo, artists):
 		thisLetter = artistLetter['name']
 
 		for thisArtist in theseArtists:
-			pprint(thisArtist)
+			#pprint(thisArtist)
 			coverArt = ""
 			try:
 				coverArt = thisArtist['coverArt']
@@ -142,16 +142,16 @@ def saveAlbums(serverInfo, albums):
 
 	theAlbums = []
 
-	print "caching album"
+	#print "caching album"
 	if 1 == albums['albumCount']:
 		# Only one album, fix the list:
 		albums["album"] = [albums["album"]]
 
 	#print("multiple albums")
 	#print albums['album'].count()
-	pprint(albums)
+	#pprint(albums)
 	for thisAlbum in albums["album"]:
-		pprint(thisAlbum)
+		#pprint(thisAlbum)
 		coverArt = ""
 		try:
 			coverArt = thisAlbum['coverArt']
@@ -288,8 +288,14 @@ def createdb(serverInfo):
 	cachedb.execute("INSERT INTO cacheinfo values ({0}, {1}, {2}, strftime('now'));".format(CACHEDBVERSION, 1, 1))
 
 	cachedb.execute("CREATE TABLE artists(artistID INTEGER, name STRING, coverArt STRING, albumCount INTEGER, indexLetter STRING);")
+	cachedb.execute("CREATE INDEX artist_id ON artists(artistID);")
+	
 	cachedb.execute("CREATE TABLE albums(albumID INTEGER, name STRING, coverArt STRING, songCount INTEGER, duration INTEGER, artist STRING, artistID INTEGER, created STRING);")
+	cachedb.execute("CREATE INDEX album_id ON albums(albumID);")
+	cachedb.execute("CREATE INDEX albumartist_id ON albums(artistID);")
+	
 	cachedb.execute("CREATE TABLE tracks(trackID INTEGER, albumID INTEGER, parentID INTEGER, album STRING, title STRING, artist STRING, artistID INTEGER, genre STRING, year INTEGER, type STRING, contentType STRING, duration INTEGER, bitrate INTEGER, size INTEGER, isVideo BOOLEAN, path STRING, suffix STRING, created STRING);")
+	cachedb.execute("CREATE INDEX track_id ON tracks(trackID);")
 
 	cachedb.commit()
 	cachedb.close()
