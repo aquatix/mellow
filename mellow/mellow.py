@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from gi.repository import Gtk
-from gi.repository import GLib
+#from gi.repository import GLib
+from gi.repository import GObject
 
 from pprint import pprint
 import urllib
@@ -25,7 +26,8 @@ serverinfo = ''
 
 
 # Use threads                                       
-GLib.threads_init()
+#GLib.threads_init()
+GObject.threads_init()
 
 
 class MainWindow(Gtk.Window):
