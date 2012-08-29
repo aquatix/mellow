@@ -185,7 +185,7 @@ def clearTracks(serverInfo):
 	cachedb.commit()
 
 
-def getTracks(serverInfo, artistID):
+def getTracks(serverInfo, artistID, albumID):
 	"""
 	Get the list of artists from the cache
 	tracks(trackID INTEGER, albumID INTEGER, parentID INTEGER, album STRING, title STRING, artist STRING, artistID INTEGER, genre STRING, year INTEGER, type STRING, contentType STRING, duration INTEGER, bitrate INTEGER, size INTEGER, isVideo BOOLEAN, path STRING, suffix STRING, created STRING);
@@ -194,17 +194,29 @@ def getTracks(serverInfo, artistID):
 	cachedir = initCache(serverInfo)
 
 	tracks = []
+	
+	tracksFilter = ''
+	
+	if -1 < artistID:
+		# Filter on artist
+		tracksFilter = tracksFilter + ' artistID=' + str(artistID)
+	if -1 < albumID:
+		# Filter on album
+		if 0 < tracksFilter.length:
+			tracksFilter = tracksFilter + ' AND '
+		tracksFilter = tracksFilter + ' albumID=' + str(albumID)
+
+	if 0 < tracksFilter.length:
+		tracksFilter = ' WHERE ' + tracksFilter
 
 	cachedb = sqlite3.connect(os.path.join(cachedir, CACHEDBFILE))
 	dbcursor = cachedb.cursor()
-	for currentTracks in dbcursor.execute("SELECT * from tracks where artistID=?;", (artistID,)):
+	for currentTrack in dbcursor.execute("SELECT * from tracks " + tracksFilter)):
 		#print(currentArtist)
-		if None != currentArtist:
-			artists.append({'id': currentArtist[0], 'name': str(currentArtist[1]), 'indexLetter': currentArtist[2]})
+		if None != currentTrack:
+			tracks.append({'id': currentTrack[0], 'name': str(currentTrack[1]), 'indexLetter': currentTrack[2]})
 
-	#pprint(artists)
-
-	return artists
+	return tracks
 
 
 def saveTracks(serverInfo, tracks):
