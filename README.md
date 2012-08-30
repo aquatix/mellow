@@ -1,5 +1,7 @@
 # mellow #
 
+mellow is a [subsonic](http://subsonic.org) client written in Python using GTK3 for its GUI. It aims to create an as native desktop experience as possible, with caching of the lists for quick responses, options to cache parts of your music collection for offline playback and integration with the desktop hotkeys and sound menu [MPRIS2 protocol](http://specifications.freedesktop.org/mpris-spec/latest/).
+
 ## INSTALL ##
 
 There is no install procedure yet. Just clone the repository, go inside the mellow directory and run:
