@@ -105,6 +105,16 @@ class MainWindow(Gtk.Window):
 		self.playbackToolBar.add(self.nextButton)
 
 
+
+		# Main list
+		#self.mainscroll = Gtk.ScrolledWindow()
+		#self.mainscroll.set_hexpand(True)
+		#self.mainscroll.set_vexpand(True)
+		#self.grid.attach_next_to(self.mainscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 1)
+
+
+
+
 		# Artists list
 		self.artistscroll = Gtk.ScrolledWindow()
 		self.artistscroll.set_hexpand(True)
@@ -112,16 +122,32 @@ class MainWindow(Gtk.Window):
 		#self.grid.attach(artistscroll, 0, 1, 3, 1)
 		self.grid.attach_next_to(self.artistscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 1)
 		
-		self.progressbar = Gtk.ProgressBar()
-		self.progressbar.set_visible(False)
-		self.grid.attach_next_to(self.progressbar, self.artistscroll, Gtk.PositionType.BOTTOM, 1, 1)
-
-
 		self.artistliststore = Gtk.ListStore(int, str)
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
 		select = self.artisttreeview.get_selection()
 		select.connect("changed", self.onArtistViewchanged)
 		self.artistscroll.add(self.artisttreeview)
+
+		#renderer_text = Gtk.CellRendererText()
+		#column_text = Gtk.TreeViewColumn("ID", renderer_text, text=0)
+		#mainwindow.artisttreeview.append_column(column_text)
+
+		renderer_artistName = Gtk.CellRendererText()
+		#renderer_editabletext.set_property("editable", True)
+
+		column_artistName = Gtk.TreeViewColumn("Artist", renderer_artistName, text=1)
+		mainwindow.artisttreeview.append_column(column_artistName)
+
+		# Make 'artistname' column searchable
+		mainwindow.artisttreeview.set_search_column(1)
+
+		#renderer_editabletext.connect("edited", self.text_edited)
+
+
+		self.progressbar = Gtk.ProgressBar()
+		self.progressbar.set_visible(False)
+		self.grid.attach_next_to(self.progressbar, self.artistscroll, Gtk.PositionType.BOTTOM, 1, 1)
+
 
 		self.loadArtistList()
 
@@ -135,11 +161,33 @@ class MainWindow(Gtk.Window):
 
 		self.albumliststore = Gtk.ListStore(int, str)
 		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
+		albumselect = self.albumtreeview.get_selection()
+		albumselect.connect("changed", self.onAlbumViewchanged)
+		self.albumscroll.add(self.albumtreeview)
+
+		#pprint(self.artistliststore.get(0))
+		#self.loadAlbumList(self.artistliststore.get(1))
+
+		renderer_albumName = Gtk.CellRendererText()
+
+		column_albumName = Gtk.TreeViewColumn("Album", renderer_albumName, text=1)
+		self.albumtreeview.append_column(column_albumName)
+
+		self.albumtreeview.set_search_column(1)
+
+
+
+		# Track list
+		self.trackscroll = Gtk.ScrolledWindow()
+		self.trackscroll.set_hexpand(True)
+		self.trackscroll.set_vexpand(True)
+		self.grid.attach_next_to(self.trackscroll, self.artistscroll, Gtk.PositionType.BOTTOM, 1, 2)
+
+		self.albumliststore = Gtk.ListStore(int, str)
+		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
 		#self.albumtreeview.connect(
 		self.albumscroll.add(self.albumtreeview)
 
-		pprint(self.artistliststore.get(0))
-		#self.loadAlbumList(self.artistliststore.get(1))
 
 
 		#self.set_default_size(gtk.gdk.screen_width(),500)
@@ -183,21 +231,6 @@ class MainWindow(Gtk.Window):
 
 			mainwindow.artistliststore.append([artist['id'], artist['name']])
 
-		#renderer_text = Gtk.CellRendererText()
-		#column_text = Gtk.TreeViewColumn("ID", renderer_text, text=0)
-		#mainwindow.artisttreeview.append_column(column_text)
-
-		renderer_artistName = Gtk.CellRendererText()
-		#renderer_editabletext.set_property("editable", True)
-
-		column_artistName = Gtk.TreeViewColumn("Artist", renderer_artistName, text=1)
-		mainwindow.artisttreeview.append_column(column_artistName)
-
-		# Make 'artistname' column searchable
-		mainwindow.artisttreeview.set_search_column(1)
-
-		#renderer_editabletext.connect("edited", self.text_edited)
-
 
 
 	#def loadAlbumList(artist, albums):
@@ -208,14 +241,20 @@ class MainWindow(Gtk.Window):
 		# Allow drag and drop reordering of rows
 		#self.treeview.set_reorderable(True)
 
+		print('show albums for artist ?', artistID)
+
+
 		serverinfo = settings.getServerInfo()
-		conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
+		#conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
 		#albums = conn.getMusicDirectory(artistid)
 		#albums = conn.getArtist(artistID)
 		albums = cache.getAlbums(serverinfo, artistID)
-		pprint(albums)
-
-		return 42
+		#pprint(albums)
+		
+		mainwindow.albumliststore.clear()
+		for album in albums:
+			pprint(album)
+			mainwindow.albumliststore.append([album['id'], album['name']])
 
 
 	def onArtistViewchanged(self, selection):
@@ -224,6 +263,12 @@ class MainWindow(Gtk.Window):
 			print("You selected", model[treeiter][0])
 			self.loadAlbumList(model[treeiter][0])
 
+
+	def onAlbumViewchanged(self, selection):
+		model, treeiter = selection.get_selected()
+		if treeiter != None:
+			print("You selected", model[treeiter][0])
+			self.loadTrackList(model[treeiter][0])
 
 
 
