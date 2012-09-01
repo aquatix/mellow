@@ -136,10 +136,10 @@ class MainWindow(Gtk.Window):
 		#renderer_editabletext.set_property("editable", True)
 
 		column_artistName = Gtk.TreeViewColumn("Artist", renderer_artistName, text=1)
-		mainwindow.artisttreeview.append_column(column_artistName)
+		self.artisttreeview.append_column(column_artistName)
 
 		# Make 'artistname' column searchable
-		mainwindow.artisttreeview.set_search_column(1)
+		self.artisttreeview.set_search_column(1)
 
 		#renderer_editabletext.connect("edited", self.text_edited)
 
