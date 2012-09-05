@@ -31,6 +31,8 @@ GObject.threads_init()
 
 
 class MainWindow(Gtk.Window):
+	
+	NAV_LIBRARY = 0
 
 	# == GUI Elements ======
 
@@ -113,7 +115,13 @@ class MainWindow(Gtk.Window):
 		self.mainscroll.set_vexpand(True)
 		self.grid.attach_next_to(self.mainscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 2)
 
+		self.mainnavliststore = Gtk.ListStore(int, str)
+		self.mainnavtreeview = Gtk.TreeView(model=self.mainnavliststore)
+		select = self.mainnavtreeview.get_selection()
+		select.connect("changed", self.onMainNavViewchanged)
+		self.mainscroll.add(self.mainnavtreeview)
 
+		self.mainnavliststore.append(NAV_LIBRARY, 'Library')
 
 
 		# Artists list
@@ -258,6 +266,16 @@ class MainWindow(Gtk.Window):
 			pprint(album)
 			mainwindow.albumliststore.append([album['id'], album['name']])
 
+
+	# == Main navigation ======
+	
+	def onMainNavViewchanged(self, selection):
+		model, treeiter = selection.get_selected()
+		if treeiter != None:
+			print("You selected", model[treeiter][0])
+
+
+	# == Music navigation ======
 
 	def onArtistViewchanged(self, selection):
 		model, treeiter = selection.get_selected()
