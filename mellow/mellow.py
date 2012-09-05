@@ -84,7 +84,8 @@ class MainWindow(Gtk.Window):
 
 		# Playback toolbar with the widgets you might expect there
 		self.playbackToolBar = Gtk.Toolbar()
-		self.grid.add(self.playbackToolBar)
+		#self.grid.add(self.playbackToolBar)
+		self.grid.attach_next_to(self.playbackToolBar, self.toolBar, Gtk.PositionType.RIGHT, 2, 1)
 		context = self.playbackToolBar.get_style_context()
 		context.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
 
@@ -107,10 +108,10 @@ class MainWindow(Gtk.Window):
 
 
 		# Main list
-		#self.mainscroll = Gtk.ScrolledWindow()
-		#self.mainscroll.set_hexpand(True)
-		#self.mainscroll.set_vexpand(True)
-		#self.grid.attach_next_to(self.mainscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 1)
+		self.mainscroll = Gtk.ScrolledWindow()
+		self.mainscroll.set_hexpand(True)
+		self.mainscroll.set_vexpand(True)
+		self.grid.attach_next_to(self.mainscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 2)
 
 
 
@@ -120,7 +121,7 @@ class MainWindow(Gtk.Window):
 		self.artistscroll.set_hexpand(True)
 		self.artistscroll.set_vexpand(True)
 		#self.grid.attach(artistscroll, 0, 1, 3, 1)
-		self.grid.attach_next_to(self.artistscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 1)
+		self.grid.attach_next_to(self.artistscroll, self.playbackToolBar, Gtk.PositionType.BOTTOM, 1, 1)
 		
 		self.artistliststore = Gtk.ListStore(int, str)
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
@@ -146,7 +147,8 @@ class MainWindow(Gtk.Window):
 
 		self.progressbar = Gtk.ProgressBar()
 		self.progressbar.set_visible(False)
-		self.grid.attach_next_to(self.progressbar, self.artistscroll, Gtk.PositionType.BOTTOM, 1, 1)
+		#self.grid.attach_next_to(self.progressbar, self.artistscroll, Gtk.PositionType.BOTTOM, 1, 1)
+		self.grid.attach_next_to(self.progressbar, self.mainscroll, Gtk.PositionType.BOTTOM, 1, 1)
 
 
 		self.loadArtistList()
@@ -157,7 +159,7 @@ class MainWindow(Gtk.Window):
 		self.albumscroll.set_hexpand(True)
 		self.albumscroll.set_vexpand(True)
 		#self.grid.attach_next_to(self.albumscroll, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
-		self.grid.attach_next_to(self.albumscroll, self.artistscroll, Gtk.PositionType.RIGHT, 1, 2)
+		self.grid.attach_next_to(self.albumscroll, self.artistscroll, Gtk.PositionType.RIGHT, 1, 1)
 
 		self.albumliststore = Gtk.ListStore(int, str)
 		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
@@ -181,7 +183,7 @@ class MainWindow(Gtk.Window):
 		self.trackscroll = Gtk.ScrolledWindow()
 		self.trackscroll.set_hexpand(True)
 		self.trackscroll.set_vexpand(True)
-		self.grid.attach_next_to(self.trackscroll, self.artistscroll, Gtk.PositionType.BOTTOM, 1, 2)
+		self.grid.attach_next_to(self.trackscroll, self.artistscroll, Gtk.PositionType.BOTTOM, 2, 1)
 
 		self.albumliststore = Gtk.ListStore(int, str)
 		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
