@@ -119,7 +119,13 @@ def getAlbums(serverInfo, artistID):
 
 	cachedb = sqlite3.connect(os.path.join(cachedir, CACHEDBFILE))
 	dbcursor = cachedb.cursor()
-	for currentAlbum in dbcursor.execute("SELECT * from albums WHERE artistID=?;", (artistID, )):
+	
+	filter = ''
+	if -1 < artistID:
+		filter = ' WHERE artistID=' + str(artistID)
+
+	#for currentAlbum in dbcursor.execute("SELECT * from albums WHERE artistID=?;", (artistID, )):
+	for currentAlbum in dbcursor.execute("SELECT * from albums" + filter):
 		#print(currentArtist)
 		if None != currentAlbum:
 			albums.append({'id': currentAlbum[0], 'name': str(currentAlbum[1]), 'coverArt':str(currentAlbum[2]), 'songCount':currentAlbum[3], 'duration':currentAlbum[4], 'artist': currentAlbum[5], 'artistID':currentAlbum[6], 'created':currentAlbum[7]})

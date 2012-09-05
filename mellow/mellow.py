@@ -32,7 +32,7 @@ GObject.threads_init()
 
 class MainWindow(Gtk.Window):
 	
-	NAV_LIBRARY = 0
+	NAV_LIBRARY = 1
 
 	# == GUI Elements ======
 
@@ -87,7 +87,7 @@ class MainWindow(Gtk.Window):
 		# Playback toolbar with the widgets you might expect there
 		self.playbackToolBar = Gtk.Toolbar()
 		#self.grid.add(self.playbackToolBar)
-		self.grid.attach_next_to(self.playbackToolBar, self.toolBar, Gtk.PositionType.RIGHT, 2, 1)
+		self.grid.attach_next_to(self.playbackToolBar, self.toolBar, Gtk.PositionType.RIGHT, 4, 1)
 		context = self.playbackToolBar.get_style_context()
 		context.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
 
@@ -113,7 +113,7 @@ class MainWindow(Gtk.Window):
 		self.mainscroll = Gtk.ScrolledWindow()
 		self.mainscroll.set_hexpand(True)
 		self.mainscroll.set_vexpand(True)
-		self.grid.attach_next_to(self.mainscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 2)
+		self.grid.attach_next_to(self.mainscroll, self.toolBar, Gtk.PositionType.BOTTOM, 1, 3)
 
 		self.mainnavliststore = Gtk.ListStore(int, str)
 		self.mainnavtreeview = Gtk.TreeView(model=self.mainnavliststore)
@@ -121,7 +121,15 @@ class MainWindow(Gtk.Window):
 		select.connect("changed", self.onMainNavViewchanged)
 		self.mainscroll.add(self.mainnavtreeview)
 
-		self.mainnavliststore.append(NAV_LIBRARY, 'Library')
+		renderer_nav = Gtk.CellRendererText()
+		column_nav = Gtk.TreeViewColumn("Source", renderer_nav, text=1)
+		self.mainnavtreeview.append_column(column_nav)
+
+		# Make 'artistname' column searchable
+		self.mainnavtreeview.set_search_column(1)
+
+		self.mainnavliststore.append([self.NAV_LIBRARY, 'Library'])
+
 
 
 		# Artists list
@@ -129,12 +137,12 @@ class MainWindow(Gtk.Window):
 		self.artistscroll.set_hexpand(True)
 		self.artistscroll.set_vexpand(True)
 		#self.grid.attach(artistscroll, 0, 1, 3, 1)
-		self.grid.attach_next_to(self.artistscroll, self.playbackToolBar, Gtk.PositionType.BOTTOM, 1, 1)
+		self.grid.attach_next_to(self.artistscroll, self.playbackToolBar, Gtk.PositionType.BOTTOM, 2, 1)
 		
 		self.artistliststore = Gtk.ListStore(int, str)
 		self.artisttreeview = Gtk.TreeView(model=self.artistliststore)
-		select = self.artisttreeview.get_selection()
-		select.connect("changed", self.onArtistViewchanged)
+		artistselect = self.artisttreeview.get_selection()
+		artistselect.connect("changed", self.onArtistViewchanged)
 		self.artistscroll.add(self.artisttreeview)
 
 		#renderer_text = Gtk.CellRendererText()
@@ -159,7 +167,7 @@ class MainWindow(Gtk.Window):
 		self.grid.attach_next_to(self.progressbar, self.mainscroll, Gtk.PositionType.BOTTOM, 1, 1)
 
 
-		self.loadArtistList()
+		#self.loadArtistList()
 
 
 		# Album list
@@ -167,7 +175,7 @@ class MainWindow(Gtk.Window):
 		self.albumscroll.set_hexpand(True)
 		self.albumscroll.set_vexpand(True)
 		#self.grid.attach_next_to(self.albumscroll, self.connectButton, Gtk.PositionType.RIGHT, 1, 2)
-		self.grid.attach_next_to(self.albumscroll, self.artistscroll, Gtk.PositionType.RIGHT, 1, 1)
+		self.grid.attach_next_to(self.albumscroll, self.artistscroll, Gtk.PositionType.RIGHT, 2, 1)
 
 		self.albumliststore = Gtk.ListStore(int, str)
 		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
@@ -191,18 +199,21 @@ class MainWindow(Gtk.Window):
 		self.trackscroll = Gtk.ScrolledWindow()
 		self.trackscroll.set_hexpand(True)
 		self.trackscroll.set_vexpand(True)
-		self.grid.attach_next_to(self.trackscroll, self.artistscroll, Gtk.PositionType.BOTTOM, 2, 1)
+		self.grid.attach_next_to(self.trackscroll, self.artistscroll, Gtk.PositionType.BOTTOM, 4, 2)
 
-		self.albumliststore = Gtk.ListStore(int, str)
-		self.albumtreeview = Gtk.TreeView(model=self.albumliststore)
+		self.trackliststore = Gtk.ListStore(int, str)
+		self.tracktreeview = Gtk.TreeView(model=self.trackliststore)
 		#self.albumtreeview.connect(
-		self.albumscroll.add(self.albumtreeview)
+		self.trackscroll.add(self.tracktreeview)
 
 
 
 		#self.set_default_size(gtk.gdk.screen_width(),500)
 		self.set_default_size(appsettings['winWidth'], appsettings['winHeight'])
 		self.move(appsettings['winX'], appsettings['winY']);
+		
+		self.loadArtistList()
+		self.loadAlbumList(-1)
 
 
 
@@ -230,6 +241,7 @@ class MainWindow(Gtk.Window):
 		mainwindow.artistliststore.clear()
 		previousLetter = ''
 
+		mainwindow.artistliststore.append([-1, 'All artists'])
 		for artist in artists:
 			#print(artist)
 			thisLetter = artist['indexLetter']
@@ -243,7 +255,6 @@ class MainWindow(Gtk.Window):
 
 
 
-	#def loadAlbumList(artist, albums):
 	def loadAlbumList(mainwindow, artistID):
 		# Allow sorting on the column
 		#self.tvcolumn.set_sort_column_id(0)
@@ -262,9 +273,14 @@ class MainWindow(Gtk.Window):
 		#pprint(albums)
 		
 		mainwindow.albumliststore.clear()
+		mainwindow.albumliststore.append([-1, 'All albums'])
 		for album in albums:
-			pprint(album)
+			#pprint(album)
 			mainwindow.albumliststore.append([album['id'], album['name']])
+
+
+	def loadTrackList(mainwindow, artistID, albumID):
+		print('show albums for artist ' + artistID + ' and album '+ str(albumID))
 
 
 	# == Main navigation ======
