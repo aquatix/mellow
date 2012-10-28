@@ -68,12 +68,11 @@ class MainWindow(Gtk.Window):
 		#self.add(self.button)
 		#self.grid.add(self.connectButton)
 
-		#self.connectButton = Gtk.ToolButton()
-		self.connectButton = Gtk.ToolButton(stock_id=Gtk.STOCK_CONNECT)
-		self.connectButton.set_property("visible",True)
-		#self.connectButton.set_property("icon_name","list-add-symbolic")
-		self.connectButton.connect("clicked", self.onConnectbuttonClicked)
-		self.toolBar.add(self.connectButton)
+		#self.connectButton = Gtk.ToolButton(stock_id=Gtk.STOCK_CONNECT)
+		#self.connectButton.set_property("visible",True)
+		##self.connectButton.set_property("icon_name","list-add-symbolic")
+		#self.connectButton.connect("clicked", self.onConnectbuttonClicked)
+		#self.toolBar.add(self.connectButton)
 
 
 		self.refreshButton = Gtk.ToolButton()
@@ -279,8 +278,36 @@ class MainWindow(Gtk.Window):
 			mainwindow.albumliststore.append([album['id'], album['name']])
 
 
-	def loadTrackList(mainwindow, artistID, albumID):
-		print('show albums for artist ' + artistID + ' and album '+ str(albumID))
+	#def loadTrackList(mainwindow, artistID, albumID):
+	def loadTrackList(mainwindow, albumID):
+		#print('show albums for artist ' + artistID + ' and album '+ str(albumID))
+		serverinfo = settings.getServerInfo()
+
+		if {} == serverinfo:
+			print("Login failed!")
+			return
+
+		try:
+			conn = libsonic.Connection(serverinfo['host'], serverinfo['username'], serverinfo['password'], serverinfo['port'])
+		except urllib.error.HTTPError:
+			print("User/pass fail")
+
+		print ("Getting album " + str(albumID))
+		try:
+			# @TODO: use ifModifiedSince with caching
+			print("getTrackList()")
+			tracks = conn.getAlbum(albumID)
+			album = tracks["album"]
+			pprint(album)
+			songCount = album["songCount"]
+			saveTracks(serverinfo, album)
+		except urllib.error.HTTPError:
+			print("authfail while getting album")
+			return -1
+		except KeyError, e:
+			print("[getArtistsFromServer] KeyError: something was wrong with the data")
+			return -1
+		#pprint(artists)
 
 
 	# == Main navigation ======

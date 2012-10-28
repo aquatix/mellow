@@ -230,6 +230,8 @@ def getTracks(serverInfo, artistID, albumID):
 def saveTracks(serverInfo, tracks):
 	"""
 	Save the list of tracks to cache for easy and fast querying
+	tracks(trackID INTEGER, albumID INTEGER, parentID INTEGER, album STRING, title STRING, artist STRING, artistID INTEGER, genre STRING, year INTEGER, type STRING, contentType STRING, duration INTEGER, bitrate INTEGER, size INTEGER, isVideo BOOLEAN, path STRING, suffix STRING, created STRING);
+
 	"""
 
 	theTracks = []
