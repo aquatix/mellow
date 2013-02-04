@@ -45,10 +45,12 @@ def getArtists(serverInfo):
 	cachedb = sqlite3.connect(os.path.join(cachedir, CACHEDBFILE))
 	dbcursor = cachedb.cursor()
 	for currentArtist in dbcursor.execute("SELECT * from artists;"):
-		#print(currentArtist)
+		print(currentArtist)
 		if None != currentArtist:
 			artists.append({'id': currentArtist[0], 'name': str(currentArtist[1]), 'indexLetter': currentArtist[2]})
 
+	print('the artists: ')
+	pprint(artists)
 	return artists
 
 
@@ -65,8 +67,12 @@ def saveArtists(serverInfo, artists):
 		theseArtists = artistLetter['artist']
 		thisLetter = artistLetter['name']
 
+		if type(theseArtists) == "dictionary'):
+			theseArtists = [theseArtists]
+
 		for thisArtist in theseArtists:
-			#pprint(thisArtist)
+			pprint(theseArtists)
+			pprint(thisArtist)
 			coverArt = ""
 			try:
 				coverArt = thisArtist['coverArt']
