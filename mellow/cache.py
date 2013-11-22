@@ -67,7 +67,7 @@ def saveArtists(serverInfo, artists):
 		theseArtists = artistLetter['artist']
 		thisLetter = artistLetter['name']
 
-		if type(theseArtists) == "dictionary'):
+		if type(theseArtists) == 'dictionary':
 			theseArtists = [theseArtists]
 
 		for thisArtist in theseArtists:
